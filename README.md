@@ -66,3 +66,11 @@ code詳細規則如下:
     -   Allow users to adjust parameters (`n`, `a`, `var`) via sliders or input fields.
     -   Display the generated plot and regression results.
 ```
+
+現在我想往下延伸, 從simple linear regression變成multiple regression, 為了圖像好產生, feature只需要兩個, 因此function = ax1+bx2+c + noise, 沿用linear_regression_app.py相同架構, 生成一份全新的python file. 不要更改原本的python file
+
+幫我重新改寫README.md, 內容分為下面幾大項, 每個內容盡量不超過50字, 精簡說明即可
+1. project介紹
+2. demo site (實際的website會在後續修改, 內含兩個site, simple linear regression & multiple regression)
+3. project summary
+4. devlopment Log

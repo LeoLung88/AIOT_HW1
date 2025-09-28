@@ -1,4 +1,3 @@
-# AIOT_HW1
 # CRISP-DM 線性迴歸專案
 
 ## 1. Project 介紹

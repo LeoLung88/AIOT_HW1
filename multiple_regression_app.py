@@ -77,16 +77,6 @@ random_seed = st.sidebar.number_input(
     help="設定隨機種子以確保結果可重現"
 )
 
-# CRISP-DM 階段標示
-st.sidebar.markdown("---")
-st.sidebar.markdown("### 🔄 CRISP-DM 階段")
-st.sidebar.markdown("✅ 1. 商業理解")
-st.sidebar.markdown("✅ 2. 資料理解") 
-st.sidebar.markdown("✅ 3. 資料準備")
-st.sidebar.markdown("✅ 4. 建模")
-st.sidebar.markdown("✅ 5. 評估")
-st.sidebar.markdown("✅ 6. 部署")
-
 # 主要內容區域
 col1, col2 = st.columns([2, 1])
 
@@ -260,3 +250,4 @@ st.markdown("""
 
 本範例展示了完整的CRISP-DM流程在多元迴歸中的應用。
 """)
+

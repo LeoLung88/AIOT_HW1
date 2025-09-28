@@ -71,11 +71,11 @@ prompt 2.
 ```text
 現在我想往下延伸, 從simple linear regression變成multiple regression, feature只需要兩個, 因此function = ax1+bx2+c + noise, 沿用linear_regression_app.py相同架構, 生成一份全新的python file. 不要更改原本的python file
 ```
-prompt 1.
+prompt 3.
 ```text
 幫我重新改寫README.md, 內容分為下面幾大項, 每個內容盡量不超過50字, 精簡說明即可
 1. project介紹
 2. demo site (內含兩個site, simple linear regression & multiple regression)
 3. project summary
 4. devlopment Log
-5. ```
+```

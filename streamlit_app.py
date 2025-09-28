@@ -12,7 +12,7 @@ st.set_page_config(
 )
 
 # 標題
-st.title("🔬 CRISP-DM 線性迴歸互動範例")
+st.title("🔬 線性迴歸互動範例")
 st.markdown("---")
 
 # 側邊欄 - 參數設定
@@ -64,16 +64,6 @@ random_seed = st.sidebar.number_input(
     help="設定隨機種子以確保結果可重現"
 )
 
-# CRISP-DM 階段標示
-st.sidebar.markdown("---")
-st.sidebar.markdown("### 🔄 CRISP-DM 階段")
-st.sidebar.markdown("✅ 1. 商業理解")
-st.sidebar.markdown("✅ 2. 資料理解") 
-st.sidebar.markdown("✅ 3. 資料準備")
-st.sidebar.markdown("✅ 4. 建模")
-st.sidebar.markdown("✅ 5. 評估")
-st.sidebar.markdown("✅ 6. 部署")
-
 # 主要內容區域
 col1, col2 = st.columns([2, 1])
 
@@ -110,17 +100,17 @@ with col1:
                alpha=0.6, 
                s=30, 
                color='blue', 
-               label=f'資料點 (n={n_points})')
+               label=f'Data Points (n={n_points})')
     
     # 繪製迴歸線 (紅色)
     ax.plot(df['x'], y_pred, 
             color='red', 
             linewidth=3, 
-            label='線性迴歸線')
+            label='Linear Regression Line')
     
     # 標記離群值
     for i, (idx, row) in enumerate(outliers.iterrows()):
-        ax.annotate(f'離群值 {i+1}', 
+        ax.annotate(f'Outlier {i+1}', 
                    (row['x'], row['y']), 
                    textcoords="offset points", 
                    xytext=(0, 15), 
@@ -134,9 +124,9 @@ with col1:
                   linewidth=2,
                   zorder=5)
     
-    ax.set_xlabel("X 值", fontsize=12)
-    ax.set_ylabel("Y 值", fontsize=12)
-    ax.set_title(f"線性迴歸分析 (y = {coefficient_a:.1f}x + {intercept_b:.1f} + noise)", 
+    ax.set_xlabel("X Values", fontsize=12)
+    ax.set_ylabel("Y Values", fontsize=12)
+    ax.set_title(f"Linear Regression Analysis (y = {coefficient_a:.1f}x + {intercept_b:.1f} + noise)", 
                 fontsize=14, fontweight='bold')
     ax.legend(fontsize=10)
     ax.grid(True, alpha=0.3)

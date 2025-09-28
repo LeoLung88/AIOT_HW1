@@ -9,11 +9,11 @@
 
 ## 2. Demo Site
 
-**簡單線性迴歸**: `streamlit run linear_regression_app.py`
+**簡單線性迴歸**: https://aiothw1-123.streamlit.app/
 - 單一特徵迴歸模型 (y = ax + b + noise)
 - 2D散點圖與迴歸線視覺化
 
-**多元迴歸**: `streamlit run multiple_regression_app.py`
+**多元迴歸**: https://aiothw1-1231.streamlit.app/
 - 雙特徵迴歸模型 (y = ax₁ + bx₂ + c + noise)
 - 3D散點圖與迴歸平面視覺化
 
@@ -43,7 +43,7 @@
 10.0: README.md 重新改寫和重構，以提供更好的專案文檔。
 
 ## 5. Prompt
-```
+```text
 以CRISP_DM方式, 建立可在streamlit框架下的可互動simple linear regression example. 
 請勿將問題複雜化, 以簡易可懂方式生成程序碼. 
 建立過程需紀錄每個步驟的log. 所有生成檔案放在HW1\folder下.

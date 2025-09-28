@@ -1,164 +1,180 @@
-# Streamlit 線性回歸互動演示
-# 透過滑桿調整模型參數並即時可視化
-
 import streamlit as st
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import r2_score, mean_squared_error
 
 # 設定頁面配置
 st.set_page_config(
-    page_title="線性回歸互動演示",
-    page_icon="📊",
-    layout="wide"
+    page_title="CRISP-DM 線性迴歸範例", 
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# 設定中文字體
-plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei', 'SimHei']
-plt.rcParams['axes.unicode_minus'] = False
+# 標題
+st.title("🔬 CRISP-DM 線性迴歸互動範例")
+st.markdown("---")
 
-def generate_data(n_points, coefficient, noise_level):
-    """生成線性回歸數據"""
-    np.random.seed(42)  # 固定種子確保可重現性
-    
-    # 生成X數據 (1-8秒的載入時間)
-    X = np.random.uniform(1, 8, n_points).reshape(-1, 1)
-    
-    # 生成Y數據: y = ax + b + noise
-    intercept = 0.1  # 固定截距
-    y = intercept + coefficient * X.flatten() + np.random.normal(0, noise_level, n_points)
-    
-    # 限制Y在合理範圍內
-    y = np.clip(y, 0.05, 0.9)
-    
-    return X, y
+# 側邊欄 - 參數設定
+st.sidebar.header("📊 資料參數設定")
 
-def train_model(X, y):
-    """訓練線性回歸模型"""
+# 1. 資料生成參數
+n_points = st.sidebar.slider(
+    "資料點數量 (n)", 
+    min_value=100, 
+    max_value=1000, 
+    value=500, 
+    step=50,
+    help="生成多少個資料點"
+)
+
+coefficient_a = st.sidebar.slider(
+    "線性係數 (a)", 
+    min_value=-10.0, 
+    max_value=10.0, 
+    value=2.0, 
+    step=0.1,
+    help="y = ax + b + noise 中的係數 a"
+)
+
+intercept_b = st.sidebar.slider(
+    "截距 (b)", 
+    min_value=-20.0, 
+    max_value=20.0, 
+    value=5.0, 
+    step=0.5,
+    help="y = ax + b + noise 中的截距 b"
+)
+
+noise_variance = st.sidebar.slider(
+    "雜訊變異數 (var)", 
+    min_value=0, 
+    max_value=1000, 
+    value=100, 
+    step=10,
+    help="雜訊的變異數，影響資料的分散程度"
+)
+
+# 設定隨機種子以確保結果可重現
+random_seed = st.sidebar.number_input(
+    "隨機種子", 
+    min_value=0, 
+    max_value=9999, 
+    value=42,
+    help="設定隨機種子以確保結果可重現"
+)
+
+# CRISP-DM 階段標示
+st.sidebar.markdown("---")
+st.sidebar.markdown("### 🔄 CRISP-DM 階段")
+st.sidebar.markdown("✅ 1. 商業理解")
+st.sidebar.markdown("✅ 2. 資料理解") 
+st.sidebar.markdown("✅ 3. 資料準備")
+st.sidebar.markdown("✅ 4. 建模")
+st.sidebar.markdown("✅ 5. 評估")
+st.sidebar.markdown("✅ 6. 部署")
+
+# 主要內容區域
+col1, col2 = st.columns([2, 1])
+
+with col1:
+    st.subheader("📈 線性迴歸視覺化")
+    
+    # 生成資料 (CRISP-DM 3.0 資料準備)
+    np.random.seed(random_seed)
+    x = np.random.rand(n_points) * 20 - 10  # x範圍：-10到10
+    y_true = coefficient_a * x + intercept_b
+    noise = np.random.normal(0, np.sqrt(noise_variance), n_points)
+    y = y_true + noise
+    
+    # 建立DataFrame
+    df = pd.DataFrame({'x': x, 'y': y})
+    
+    # 執行線性迴歸 (CRISP-DM 4.0 建模)
     model = LinearRegression()
-    model.fit(X, y)
-    return model
-
-def create_plot(X, y, model, coefficient, noise_level):
-    """創建可視化圖表"""
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+    model.fit(x.reshape(-1, 1), y)
+    y_pred = model.predict(x.reshape(-1, 1))
     
-    # 左圖：數據點和回歸線
-    ax1.scatter(X, y, alpha=0.6, color='blue', s=30, label='數據點')
+    # 計算殘差用於離群值檢測 (CRISP-DM 5.0 評估)
+    residuals = np.abs(y - y_pred)
+    df['residuals'] = residuals
     
-    # 繪製回歸線
-    X_range = np.linspace(X.min(), X.max(), 100).reshape(-1, 1)
-    y_range = model.predict(X_range)
-    ax1.plot(X_range, y_range, color='red', linewidth=2, label='回歸線')
+    # 識別前5個離群值
+    outliers = df.nlargest(5, 'residuals')
     
-    ax1.set_xlabel('載入時間 (秒)')
-    ax1.set_ylabel('跳出率')
-    ax1.set_title(f'線性回歸模型\n(係數={coefficient:.2f}, 噪聲={noise_level:.2f})')
-    ax1.legend()
-    ax1.grid(True, alpha=0.3)
+    # 繪製圖表
+    fig, ax = plt.subplots(figsize=(10, 6))
     
-    # 右圖：殘差圖
-    y_pred = model.predict(X)
-    residuals = y - y_pred
-    ax2.scatter(y_pred, residuals, alpha=0.6, color='green', s=30)
-    ax2.axhline(y=0, color='red', linestyle='--')
-    ax2.set_xlabel('預測值')
-    ax2.set_ylabel('殘差')
-    ax2.set_title('殘差分布')
-    ax2.grid(True, alpha=0.3)
+    # 繪製資料點
+    ax.scatter(df['x'], df['y'], 
+               alpha=0.6, 
+               s=30, 
+               color='blue', 
+               label=f'資料點 (n={n_points})')
     
-    plt.tight_layout()
-    return fig
-
-# 主應用程式
-def main():
-    st.title("📊 線性回歸互動演示")
-    st.markdown("---")
+    # 繪製迴歸線 (紅色)
+    ax.plot(df['x'], y_pred, 
+            color='red', 
+            linewidth=3, 
+            label='線性迴歸線')
     
-    # 側邊欄 - 參數調整
-    st.sidebar.header("🎛️ 模型參數調整")
+    # 標記離群值
+    for i, (idx, row) in enumerate(outliers.iterrows()):
+        ax.annotate(f'離群值 {i+1}', 
+                   (row['x'], row['y']), 
+                   textcoords="offset points", 
+                   xytext=(0, 15), 
+                   ha='center', 
+                   color='purple',
+                   fontweight='bold')
+        ax.scatter(row['x'], row['y'], 
+                  color='purple', 
+                  s=150, 
+                  edgecolors='black', 
+                  linewidth=2,
+                  zorder=5)
     
-    # 滑桿1：數據點數量
-    n_points = st.sidebar.slider(
-        "數據點數量",
-        min_value=50,
-        max_value=500,
-        value=200,
-        step=10,
-        help="調整數據集的樣本數量"
-    )
+    ax.set_xlabel("X 值", fontsize=12)
+    ax.set_ylabel("Y 值", fontsize=12)
+    ax.set_title(f"線性迴歸分析 (y = {coefficient_a:.1f}x + {intercept_b:.1f} + noise)", 
+                fontsize=14, fontweight='bold')
+    ax.legend(fontsize=10)
+    ax.grid(True, alpha=0.3)
     
-    # 滑桿2：係數a
-    coefficient = st.sidebar.slider(
-        "係數 a (y=ax+b+noise)",
-        min_value=0.05,
-        max_value=0.25,
-        value=0.12,
-        step=0.01,
-        help="調整線性關係的斜率"
-    )
-    
-    # 滑桿3：噪聲水平
-    noise_level = st.sidebar.slider(
-        "噪聲水平",
-        min_value=0.01,
-        max_value=0.15,
-        value=0.05,
-        step=0.01,
-        help="調整數據的隨機噪聲"
-    )
-    
-    # 生成數據
-    X, y = generate_data(n_points, coefficient, noise_level)
-    
-    # 訓練模型
-    model = train_model(X, y)
-    
-    # 計算模型指標
-    y_pred = model.predict(X)
-    r2 = r2_score(y, y_pred)
-    rmse = np.sqrt(mean_squared_error(y, y_pred))
-    
-    # 顯示模型資訊
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.metric("R² 分數", f"{r2:.3f}")
-    
-    with col2:
-        st.metric("RMSE", f"{rmse:.3f}")
-    
-    with col3:
-        st.metric("數據點數", n_points)
-    
-    # 顯示回歸方程式
-    slope = model.coef_[0]
-    intercept = model.intercept_
-    st.info(f"**回歸方程式**: y = {intercept:.3f} + {slope:.3f}x")
-    
-    # 顯示圖表
-    fig = create_plot(X, y, model, coefficient, noise_level)
     st.pyplot(fig)
-    
-    # 預測示範
-    st.subheader("🔮 預測示範")
-    col1, col2, col3 = st.columns(3)
-    
-    test_values = [2, 4, 6]
-    for i, val in enumerate(test_values):
-        pred = model.predict([[val]])[0]
-        with [col1, col2, col3][i]:
-            st.metric(f"載入時間 {val}秒", f"{pred:.3f}")
-    
-    # 說明
-    st.markdown("---")
-    st.markdown("""
-    ### 📝 使用說明
-    - **數據點數量**: 調整數據集的樣本數量，影響模型的穩定性
-    - **係數 a**: 調整線性關係的強度，數值越大表示載入時間對跳出率的影響越明顯
-    - **噪聲水平**: 調整數據的隨機性，噪聲越大模型越難擬合
-    """)
 
-if __name__ == "__main__":
-    main()
+with col2:
+    st.subheader("📊 模型結果")
+    
+    # 顯示模型係數
+    st.markdown("### 🎯 迴歸係數")
+    st.metric("斜率 (a)", f"{model.coef_[0]:.3f}")
+    st.metric("截距 (b)", f"{model.intercept_:.3f}")
+    
+    # 計算R²分數
+    from sklearn.metrics import r2_score
+    r2 = r2_score(y, y_pred)
+    st.metric("R² 分數", f"{r2:.3f}")
+    
+    # 顯示離群值資訊
+    st.markdown("### 🔍 前5個離群值")
+    outliers_display = outliers[['x', 'y', 'residuals']].copy()
+    outliers_display.columns = ['X值', 'Y值', '殘差']
+    outliers_display.index = [f'離群值 {i+1}' for i in range(len(outliers_display))]
+    st.dataframe(outliers_display.round(3), use_container_width=True)
+
+# 底部資訊
+st.markdown("---")
+st.markdown("### 📋 CRISP-DM 方法論說明")
+st.markdown("""
+**CRISP-DM (Cross-Industry Standard Process for Data Mining)** 是資料探勘的標準流程：
+
+1. **商業理解** - 定義專案目標和需求
+2. **資料理解** - 收集和探索資料
+3. **資料準備** - 清理和轉換資料
+4. **建模** - 建立預測模型
+5. **評估** - 評估模型效果
+6. **部署** - 部署和監控模型
+
+本範例展示了完整的CRISP-DM流程，從資料生成到模型部署的互動式體驗。
+""")
